@@ -1,0 +1,254 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import { SITE_TITLE } from "../consts";
+---
+
+<!doctype html>
+<html lang="fr">
+	<head>
+		<BaseHead title={SITE_TITLE} description="Sensations fortes" />
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				background: white;
+				color: black;
+				min-height: 100vh;
+				display: flex;
+				flex-direction: column;
+				font-family: system-ui, sans-serif;
+			}
+			.container {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding-inline: 1rem;
+			}
+			.container.hidden {
+				justify-content: flex-start;
+				padding-top: 2rem;
+			}
+			.subtitles {
+				display: none;
+				gap: 1.5rem;
+				margin-top: 2rem;
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+			.subtitles.visible {
+				display: flex;
+			}
+			.subtitles a {
+				color: black;
+				text-decoration: underline;
+				cursor: pointer;
+				font-size: 1.25rem;
+			}
+			.subtitles a:hover {
+				opacity: 0.7;
+			}
+			.bottom-info {
+				padding: 1.5rem;
+				text-align: center;
+				font-size: 1.125rem;
+				min-height: 3rem;
+				flex-shrink: 0;
+			}
+			.bottom-info.large {
+				font-size: 1.75rem;
+				font-weight: 600;
+			}
+			.bottom-info__title {
+				display: block;
+				font-size: 1.75rem;
+				font-weight: 600;
+			}
+			.bottom-info__dates {
+				display: block;
+				font-weight: 400;
+				margin-top: 0.5rem;
+			}
+			/* Title stays big, dates explicitly smaller (em = relative to parent .large = 1.75rem) */
+			.bottom-info.large .bottom-info__title {
+				font-size: 1.75rem;
+				font-weight: 600;
+			}
+			.bottom-info.large .bottom-info__dates {
+				font-size: 0.5em !important;
+				font-weight: 400;
+			}
+			.video-wrap {
+				display: none;
+				width: 100%;
+				aspect-ratio: 16 / 9;
+				background: #000;
+				flex-shrink: 0;
+			}
+			.video-wrap.visible {
+				display: block;
+			}
+			.video-wrap iframe {
+				width: 100%;
+				height: 100%;
+				border: none;
+			}
+			.btn {
+				font-size: 1.5rem;
+				padding: 1rem 2rem;
+				cursor: pointer;
+				background: black;
+				color: white;
+				border: none;
+				border-radius: 0.5rem;
+				animation: blink 1s ease-in-out infinite;
+			}
+			.btn:hover {
+				opacity: 0.9;
+			}
+			@keyframes blink {
+				0%,
+				100% {
+					opacity: 1;
+				}
+				50% {
+					opacity: 0.4;
+				}
+			}
+			.title-wrap {
+				width: 100%;
+				padding-inline: 1.5rem;
+				display: none;
+				overflow: hidden;
+				box-sizing: border-box;
+			}
+			.title-wrap.visible {
+				display: block;
+			}
+			.title {
+				font-size: clamp(3rem, 15vw, 8rem);
+				font-weight: 800;
+				letter-spacing: -0.02em;
+				white-space: nowrap;
+				max-width: 100%;
+			}
+			@media (max-width: 640px) {
+				.title {
+					white-space: normal;
+					font-size: clamp(2rem, 10vw, 4rem);
+				}
+			}
+			.container.hidden .btn-wrap {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container" id="container">
+			<div class="btn-wrap">
+				<button type="button" class="btn" id="btn">ne pas cliquer</button>
+			</div>
+			<div class="title-wrap" id="titleWrap">
+				<h1 class="title" id="title">Sensations fortes ?</h1>
+			</div>
+			<div class="subtitles" id="subtitles">
+				<span>Au choix : </span>
+				<a data-lieu="1" href="#">Lieu 1</a>
+				<a data-lieu="2" href="#">Lieu 2</a>
+				<a data-lieu="3" href="#">Lieu 3</a>
+			</div>
+		</div>
+		<div class="bottom-info" id="bottomInfo"></div>
+		<div class="video-wrap" id="videoWrap">
+			<iframe
+				id="videoIframe"
+				title="YouTube video"
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+				allowfullscreen></iframe>
+		</div>
+		<script>
+			const container = document.getElementById("container");
+			const btn = document.getElementById("btn");
+			const title = document.getElementById("title");
+			const subtitles = document.getElementById("subtitles");
+			const bottomInfo = document.getElementById("bottomInfo");
+			const videoWrap = document.getElementById("videoWrap");
+			const videoIframe = document.getElementById(
+				"videoIframe",
+			) as HTMLIFrameElement;
+			const VIDEO_URLS: Record<number, string> = {
+				1: "https://www.youtube.com/embed/1f5f5qMvel0?autoplay=1&muted=1",
+				2: "https://www.youtube.com/embed/wmlV8XkaO1M?autoplay=1&muted=1",
+				3: "https://www.youtube.com/embed/wmlV8XkaO1M?autoplay=1&muted=1",
+			};
+			const lieuTexts: Record<
+				number,
+				string | { title: string; subtitle?: string; specs?: string }
+			> = {
+				1: {
+					title: "Porsche Track Experience au Mans",
+					specs: "Porsche 911 | 0 à 100 en 3.1s | 541ch | 312km/h",
+					subtitle: "samedi 11 juillet, samedi 18 juillet ou samedi 29 août",
+				},
+				2: {
+					title: "Stage de pilotage en Bourgogne, circuit de Dijon-Prenois",
+					specs:
+						"Ferrari 296 GTB, Ferrari F8 Tributo, Lamborghini Huracan ou Porsche 992 GT3 RS",
+					subtitle:
+						"mercredi 29/04, mercredi 27/05, jeudi 25/06, mercredi 22/07 ou mercredi 26/08",
+				},
+				3: {
+					title: "Stage de pilotage au circuit du Bugey (122 km d'Annecy)",
+					specs:
+						"Ferrari 296 GTB, Ferrari F8 Tributo, Lamborghini Huracan ou Porsche 992 GT3 RS",
+					subtitle:
+						"samedi 28/03, dimanche 29/03, vendredi 01/05, samedi 02/05, dimanche 03/05, samedi 13/06 ou dimanche 14/06",
+				},
+			};
+			const titleWrap = document.getElementById("titleWrap");
+			btn?.addEventListener("click", () => {
+				container?.classList.add("hidden");
+				titleWrap?.classList.add("visible");
+				subtitles?.classList.add("visible");
+			});
+			subtitles?.addEventListener("click", (e) => {
+				const a = (e.target as HTMLElement)?.closest?.("a[data-lieu]");
+				if (!a) return;
+				e.preventDefault();
+				const lieu = a.getAttribute("data-lieu");
+				const key = lieu ? Number(lieu) : 0;
+				const data = key in lieuTexts ? lieuTexts[key] : "";
+				if (bottomInfo) {
+					bottomInfo.classList.toggle(
+						"large",
+						typeof data === "object" && !!data?.title,
+					);
+					if (typeof data === "object" && data?.title) {
+						const specs = data.specs
+							? `<div style="display:block;font-size:0.875rem;font-weight:400;margin-top:0.5rem">${data.specs}</div>`
+							: "";
+						const subtitle = data.subtitle
+							? `<div style="display:block;font-size:0.875rem;font-weight:400;margin-top:0.5rem">${data.subtitle}</div>`
+							: "";
+						bottomInfo.innerHTML =
+							`<div style="display:block;font-size:1.75rem;font-weight:600">${data.title}</div>` +
+							specs +
+							subtitle;
+					} else {
+						bottomInfo.textContent = typeof data === "string" ? data : "";
+					}
+				}
+				const videoUrl = VIDEO_URLS[key];
+				videoWrap?.classList.toggle("visible", !!videoUrl);
+				if (videoUrl && videoIframe) {
+					videoIframe.src = videoUrl;
+				}
+			});
+		</script>
+	</body>
+</html>
